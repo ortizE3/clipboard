@@ -1,0 +1,43 @@
+.clipboard-background {
+  background-color: var(--primary);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  font-size: .9em;
+}
+
+.copied-element {
+  padding: 8px;
+  margin-top: 5px;
+  text-overflow: ellipsis;
+  background-color: var(--secondary);
+  border: none;
+  color: white;
+  text-align: left;
+  transition: all ease-in-out .2s;
+}
+.copied-element:hover {
+  background-color: var(--tertiary);;
+  cursor: pointer;
+  transform: scale(1.01);
+}
+
+.search-box {
+  padding: 8px;
+  text-overflow: ellipsis;
+  background-color: var(--secondary);
+  border: none;
+  color: white;
+  text-align: left;
+  transition: all ease-in-out .2s;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  font-size: 1.2em;
+}
+.search-box:hover {
+  background-color: var(--tertiary);;
+  cursor: pointer;
+  transform: scale(1.01);
+}
