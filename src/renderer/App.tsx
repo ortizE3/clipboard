@@ -4,15 +4,32 @@ import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 
 import './App.css';
 import Clipboard from './Models/Clipboard';
+import Header from './Header/Header';
 
 function Hello() {
   const [previousText, setPreviousText] = useState<Clipboard>(new Clipboard());
   const [clipboardList, setClipboardList] = useState<Clipboard[]>([]);
   const [intervalId, setIntervalId] = useState<any>(null);
   const [searchText, setSearchText] = useState<string>('');
+
   function isDiffText(str1: string, str2: string) {
     return str2 && str1 !== str2;
   }
+
+  const updateClipboard = async (text: string) => {
+    await window.electron.clipboard.writeText(text);
+  };
+
+  function reset() {
+    clearInterval(intervalId);
+    updateClipboard('');
+    setClipboardList([]);
+    setPreviousText(new Clipboard());
+  }
+
+  useEffect(() => {
+    updateClipboard('');
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -38,10 +55,6 @@ function Hello() {
     };
   }, [previousText, clipboardList]);
 
-  const updateClipboard = async (text: string) => {
-    await window.electron.clipboard.writeText(text);
-  };
-
   const showClip = (text: string) => {
     if (!searchText) {
       return true;
@@ -52,21 +65,23 @@ function Hello() {
 
   return (
     <div className="clipboard-background">
-      {clipboardList.map(
-        (clipboard, index) =>
-          showClip(clipboard.text) && (
-            <button
-              type="button"
-              className="copied-element"
-              key={`${clipboard.text + index}`}
-              onClick={async () => {
-                updateClipboard(clipboard.text);
-              }}
-            >
-              {clipboard.displayText}
-            </button>
-          ),
-      )}
+      <Header reset={reset} />
+      {clipboardList &&
+        clipboardList.map(
+          (clipboard, index) =>
+            showClip(clipboard.text) && (
+              <button
+                type="button"
+                className="copied-element"
+                key={`${clipboard.text + index}`}
+                onClick={async () => {
+                  updateClipboard(clipboard.text);
+                }}
+              >
+                {clipboard.displayText}
+              </button>
+            ),
+        )}
       <input
         className="search-box"
         type="text"

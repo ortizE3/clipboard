@@ -39,6 +39,10 @@ ipcMain.handle('clipboard-write-text', (event, text) => {
   clipboard.writeText(text);
 });
 
+ipcMain.handle('pin-event', (event, pin) => {
+  mainWindow?.setAlwaysOnTop(pin);
+});
+
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
   sourceMapSupport.install();
@@ -79,14 +83,16 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728,
+    width: 350,
+    height: 400,
     icon: getAssetPath('icon.png'),
     webPreferences: {
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
+    autoHideMenuBar: true,
+    frame: false,
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));

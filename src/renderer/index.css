@@ -6,6 +6,7 @@ html {
     scrollbar-color: #242729 #3a3b3b;
     scrollbar-width: thin;
     overflow-x: hidden;
+
 }
 
 
@@ -18,5 +19,4 @@ body {
     --primary: #1d2021;
     --secondary: #242729;
     --tertiary: #3a3b3b;
-
 }

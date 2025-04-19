@@ -26,6 +26,10 @@ const electronHandler = {
     readText: () => ipcRenderer.invoke('clipboard-read-text'),
     writeText: (text: any) => ipcRenderer.invoke('clipboard-write-text', text),
   },
+
+  Pin: {
+    PinHandler: (pin: boolean) => ipcRenderer.invoke('pin-event', pin),
+  },
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

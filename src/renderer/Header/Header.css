@@ -1,0 +1,42 @@
+.header {
+    position: sticky;
+    top: 0;
+    padding: 8px 20px;
+    background-color: var(--tertiary);
+    z-index: 999;
+    flex-direction: row;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    cursor: grab;
+    -webkit-app-region: drag;
+}
+
+.title {
+    margin: 0;
+}
+
+.button-container {
+    flex-direction: row;
+    display: flex;
+    gap: 10px;
+    -webkit-app-region: no-drag;
+}
+
+.button-header {
+    border: none;
+    border-radius: 5px;
+    background-color: var(--primary);
+    color: white;
+    padding: 4px 7px;
+    cursor: pointer;
+    transition: all .2s ease-in-out;
+    outline: none;
+
+}
+
+.button-header:hover {
+    transform: scale(1.05);
+    background-color: var(--secondary);
+}
