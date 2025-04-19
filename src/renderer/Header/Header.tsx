@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 
 import './Header.css';
+import Reset from '../../../assets/AppIcons/reset.png';
+import Pin from '../../../assets/AppIcons/pin.png';
+import Unpin from '../../../assets/AppIcons/unpin.png';
 import HeaderProps from '../Models/HeaderProps';
 
 function Header(props: HeaderProps) {
@@ -19,11 +22,11 @@ function Header(props: HeaderProps) {
       <h4 className="title">Clipboard</h4>
       <div className="button-container">
         <button className="button-header" type="button" onClick={pinHandler}>
-          {!isPin ? 'Pin' : 'Unpin'}
+          <img className='button-img' src={!isPin ? Pin: Unpin}/>
         </button>
         {props && (
           <button className="button-header" type="button" onClick={props.reset}>
-            Reset
+            <img className='button-img' src={Reset}/>
           </button>
         )}
       </div>
