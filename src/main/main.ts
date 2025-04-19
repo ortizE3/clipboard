@@ -9,7 +9,14 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain, clipboard } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  clipboard,
+  screen,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -105,6 +112,48 @@ const createWindow = async () => {
       mainWindow.minimize();
     } else {
       mainWindow.show();
+    }
+  });
+
+  const SNAP_THRESHOLD = 30; // pixels
+  mainWindow.on('move', () => {
+    if (mainWindow) {
+      const bounds = mainWindow.getBounds(); // current window bounds
+      const display = screen.getDisplayMatching(bounds); // gets the display that intersects most with window
+
+      const workArea = display.workArea; // workArea excludes the taskbar/dock
+      let { x, y, width, height } = bounds;
+
+      let snappedX = x;
+      let snappedY = y;
+
+      // Snap left
+      if (Math.abs(x - workArea.x) <= SNAP_THRESHOLD) {
+        snappedX = workArea.x;
+      }
+
+      // Snap right
+      if (
+        Math.abs(x + width - (workArea.x + workArea.width)) <= SNAP_THRESHOLD
+      ) {
+        snappedX = workArea.x + workArea.width - width;
+      }
+
+      // Snap top
+      if (Math.abs(y - workArea.y) <= SNAP_THRESHOLD) {
+        snappedY = workArea.y;
+      }
+
+      // Snap bottom
+      if (
+        Math.abs(y + height - (workArea.y + workArea.height)) <= SNAP_THRESHOLD
+      ) {
+        snappedY = workArea.y + workArea.height - height;
+      }
+
+      if (snappedX !== x || snappedY !== y) {
+        mainWindow.setBounds({ x: snappedX, y: snappedY, width, height });
+      }
     }
   });
 
