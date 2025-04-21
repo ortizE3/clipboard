@@ -1,6 +1,6 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
-import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import { contextBridge, ipcRenderer, IpcRendererEvent, NativeImage } from 'electron';
 
 export type Channels = 'ipc-example';
 
@@ -24,7 +24,12 @@ const electronHandler = {
   },
   clipboard: {
     readText: () => ipcRenderer.invoke('clipboard-read-text'),
-    writeText: (text: any) => ipcRenderer.invoke('clipboard-write-text', text),
+    writeText: (text: string) =>
+      ipcRenderer.invoke('clipboard-write-text', text),
+    readImage: () => ipcRenderer.invoke('clipboard-read-image'),
+    writeImage: (image: string) =>
+      ipcRenderer.invoke('clipboard-write-image', image),
+    clear: () => ipcRenderer.invoke('clear-clipboard'),
   },
 
   Pin: {

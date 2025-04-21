@@ -18,6 +18,11 @@
   text-align: left;
   transition: all ease-in-out .2s;
 }
+
+.copied-element-img {
+  height: 60px;
+}
+
 .copied-element:hover {
   background-color: var(--tertiary);;
   cursor: pointer;

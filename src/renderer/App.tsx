@@ -1,13 +1,18 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
+import { NativeImage } from 'electron';
 
-import './App.css';
 import Clipboard from './Models/Clipboard';
 import Header from './Header/Header';
 
+import './App.css';
+
 function Hello() {
-  const [previousText, setPreviousText] = useState<Clipboard>(new Clipboard());
+  const [previousClip, setPreviousClip] = useState<Clipboard>(new Clipboard());
+  const [previousImage, setPreviousImage] = useState<Clipboard>(
+    new Clipboard(),
+  );
   const [clipboardList, setClipboardList] = useState<Clipboard[]>([]);
   const [intervalId, setIntervalId] = useState<any>(null);
   const [searchText, setSearchText] = useState<string>('');
@@ -16,25 +21,35 @@ function Hello() {
     return str2 && str1 !== str2;
   }
 
-  const updateClipboard = async (text: string) => {
-    await window.electron.clipboard.writeText(text);
+  const updateClipboard = async (clipboard: Clipboard) => {
+    if (clipboard) {
+      if (clipboard.isImage && clipboard.image) {
+        await window.electron.clipboard.writeImage(clipboard.text);
+      } else {
+        await window.electron.clipboard.writeText(clipboard.text);
+      }
+    }
+  };
+
+  const clearClipboard = async () => {
+    await window.electron.clipboard.clear();
   };
 
   function reset() {
     clearInterval(intervalId);
-    updateClipboard('');
+    clearClipboard();
     setClipboardList([]);
-    setPreviousText(new Clipboard());
+    setPreviousClip(new Clipboard());
   }
 
   useEffect(() => {
-    updateClipboard('');
+    clearClipboard();
   }, []);
 
   useEffect(() => {
     const interval = setInterval(async () => {
       const clipboard = await window.electron.clipboard.readText();
-      if (clipboard && isDiffText(previousText?.text, clipboard)) {
+      if (clipboard && isDiffText(previousClip?.text, clipboard)) {
         const newClipboard = new Clipboard();
         newClipboard.text = clipboard;
         if (clipboard && clipboard.length > 70) {
@@ -42,10 +57,26 @@ function Hello() {
         } else {
           newClipboard.displayText = clipboard;
         }
-        setPreviousText(newClipboard);
+        setPreviousClip(newClipboard);
         setClipboardList([newClipboard, ...clipboardList]);
       }
-    }, 500);
+
+      const image: NativeImage = await window.electron.clipboard.readImage();
+      const imageText = image?.toDataURL();
+      if (
+        image &&
+        !image.isEmpty() &&
+        isDiffText(previousImage?.text, imageText)
+      ) {
+        const newClipboard = new Clipboard();
+        newClipboard.isImage = true;
+        newClipboard.image = image;
+        console.log(image)
+        newClipboard.text = image.toDataURL();
+        setPreviousImage(newClipboard);
+        setClipboardList([newClipboard, ...clipboardList]);
+      }
+    }, 300);
     setIntervalId(interval);
 
     return () => {
@@ -53,7 +84,7 @@ function Hello() {
         clearInterval(intervalId);
       }
     };
-  }, [previousText, clipboardList]);
+  }, [previousClip, clipboardList]);
 
   const showClip = (text: string) => {
     if (!searchText) {
@@ -63,25 +94,44 @@ function Hello() {
     return text.toLowerCase().includes(query);
   };
 
+  const displayClip = (clipboard: Clipboard, index: number) => {
+    if (clipboard.displayText && showClip(clipboard.text)) {
+      return (
+        <button
+          type="button"
+          className="copied-element"
+          key={clipboard.text + index}
+          onClick={async () => {
+            updateClipboard(clipboard);
+          }}
+        >
+          {clipboard.displayText}
+        </button>
+      );
+    }
+    if (clipboard.isImage && clipboard.text && showClip(clipboard.text)) {
+      return (
+        <button
+          type="button"
+          className="copied-element"
+          key={clipboard.text + index}
+          onClick={async () => {
+            updateClipboard(clipboard);
+          }}
+        >
+          <img className="copied-element-img" src={clipboard.text} />
+        </button>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div className="clipboard-background">
       <Header reset={reset} />
       {clipboardList &&
-        clipboardList.map(
-          (clipboard, index) =>
-            showClip(clipboard.text) && (
-              <button
-                type="button"
-                className="copied-element"
-                key={`${clipboard.text + index}`}
-                onClick={async () => {
-                  updateClipboard(clipboard.text);
-                }}
-              >
-                {clipboard.displayText}
-              </button>
-            ),
-        )}
+        clipboardList.map((clipboard, index) => displayClip(clipboard, index))}
       <input
         className="search-box"
         type="text"

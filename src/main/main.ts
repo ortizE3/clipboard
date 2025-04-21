@@ -16,6 +16,8 @@ import {
   ipcMain,
   clipboard,
   screen,
+  NativeImage,
+  nativeImage,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -44,6 +46,18 @@ ipcMain.handle('clipboard-read-text', () => {
 
 ipcMain.handle('clipboard-write-text', (event, text) => {
   clipboard.writeText(text);
+});
+
+ipcMain.handle('clipboard-read-image', () => {
+  return clipboard.readImage();
+});
+
+ipcMain.handle('clipboard-write-image', (event, imagePath) => {
+  clipboard.writeImage(nativeImage.createFromDataURL(imagePath));
+});
+
+ipcMain.handle('clear-clipboard', () => {
+  clipboard.clear();
 });
 
 ipcMain.handle('pin-event', (event, pin) => {
@@ -115,46 +129,54 @@ const createWindow = async () => {
     }
   });
 
+  let interval: any;
   const SNAP_THRESHOLD = 30; // pixels
   mainWindow.on('move', () => {
-    if (mainWindow) {
-      const bounds = mainWindow.getBounds(); // current window bounds
-      const display = screen.getDisplayMatching(bounds); // gets the display that intersects most with window
-
-      const workArea = display.workArea; // workArea excludes the taskbar/dock
-      let { x, y, width, height } = bounds;
-
-      let snappedX = x;
-      let snappedY = y;
-
-      // Snap left
-      if (Math.abs(x - workArea.x) <= SNAP_THRESHOLD) {
-        snappedX = workArea.x;
-      }
-
-      // Snap right
-      if (
-        Math.abs(x + width - (workArea.x + workArea.width)) <= SNAP_THRESHOLD
-      ) {
-        snappedX = workArea.x + workArea.width - width;
-      }
-
-      // Snap top
-      if (Math.abs(y - workArea.y) <= SNAP_THRESHOLD) {
-        snappedY = workArea.y;
-      }
-
-      // Snap bottom
-      if (
-        Math.abs(y + height - (workArea.y + workArea.height)) <= SNAP_THRESHOLD
-      ) {
-        snappedY = workArea.y + workArea.height - height;
-      }
-
-      if (snappedX !== x || snappedY !== y) {
-        mainWindow.setBounds({ x: snappedX, y: snappedY, width, height });
-      }
+    if (interval) {
+      clearInterval(interval);
     }
+
+    interval = setInterval(() => {
+      if (mainWindow) {
+        const bounds = mainWindow.getBounds(); // current window bounds
+        const display = screen.getDisplayMatching(bounds); // gets the display that intersects most with window
+
+        const { workArea } = display; // workArea excludes the taskbar/dock
+        const { x, y, width, height } = bounds;
+
+        let snappedX = x;
+        let snappedY = y;
+
+        // Snap left
+        if (Math.abs(x - workArea.x) <= SNAP_THRESHOLD) {
+          snappedX = workArea.x;
+        }
+
+        // Snap right
+        if (
+          Math.abs(x + width - (workArea.x + workArea.width)) <= SNAP_THRESHOLD
+        ) {
+          snappedX = workArea.x + workArea.width - width;
+        }
+
+        // Snap top
+        if (Math.abs(y - workArea.y) <= SNAP_THRESHOLD) {
+          snappedY = workArea.y;
+        }
+
+        // Snap bottom
+        if (
+          Math.abs(y + height - (workArea.y + workArea.height)) <=
+          SNAP_THRESHOLD
+        ) {
+          snappedY = workArea.y + workArea.height - height;
+        }
+
+        if (snappedX !== x || snappedY !== y) {
+          mainWindow.setBounds({ x: snappedX, y: snappedY, width, height });
+        }
+      }
+    }, 100);
   });
 
   mainWindow.on('closed', () => {
