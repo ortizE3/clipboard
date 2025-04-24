@@ -5,6 +5,8 @@ import { NativeImage } from 'electron';
 
 import Clipboard from './Models/Clipboard';
 import Header from './Header/Header';
+import Clip from './Clip/Clip';
+import useDebouncedEffect from '../Hooks/CustomHook';
 
 import './App.css';
 
@@ -71,7 +73,6 @@ function Hello() {
         const newClipboard = new Clipboard();
         newClipboard.isImage = true;
         newClipboard.image = image;
-        console.log(image)
         newClipboard.text = image.toDataURL();
         setPreviousImage(newClipboard);
         setClipboardList([newClipboard, ...clipboardList]);
@@ -86,52 +87,34 @@ function Hello() {
     };
   }, [previousClip, clipboardList]);
 
-  const showClip = (text: string) => {
-    if (!searchText) {
-      return true;
-    }
-    const query = searchText.toLowerCase();
-    return text.toLowerCase().includes(query);
-  };
+  useDebouncedEffect(
+    () => {
+      searchClips();
+    },
+    [searchText],
+    300,
+  );
 
-  const displayClip = (clipboard: Clipboard, index: number) => {
-    if (clipboard.displayText && showClip(clipboard.text)) {
-      return (
-        <button
-          type="button"
-          className="copied-element"
-          key={clipboard.text + index}
-          onClick={async () => {
-            updateClipboard(clipboard);
-          }}
-        >
-          {clipboard.displayText}
-        </button>
-      );
+  const searchClips = () => {
+    for (const clip of clipboardList) {
+      const query = searchText.toLowerCase();
+      clip.show = searchText ? clip.text.toLowerCase().includes(query) : true;
     }
-    if (clipboard.isImage && clipboard.text && showClip(clipboard.text)) {
-      return (
-        <button
-          type="button"
-          className="copied-element"
-          key={clipboard.text + index}
-          onClick={async () => {
-            updateClipboard(clipboard);
-          }}
-        >
-          <img className="copied-element-img" src={clipboard.text} />
-        </button>
-      );
-    }
-
-    return null;
+    setClipboardList([...clipboardList]);
   };
 
   return (
     <div className="clipboard-background">
       <Header reset={reset} />
       {clipboardList &&
-        clipboardList.map((clipboard, index) => displayClip(clipboard, index))}
+        clipboardList.map((clipboard, index) => (
+          <Clip
+            key={index}
+            clipboard={clipboard}
+            index={index}
+            updateClipboard={updateClipboard}
+          />
+        ))}
       <input
         className="search-box"
         type="text"

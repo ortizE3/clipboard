@@ -1,6 +1,11 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
-import { contextBridge, ipcRenderer, IpcRendererEvent, NativeImage } from 'electron';
+import {
+  contextBridge,
+  ipcRenderer,
+  IpcRendererEvent,
+  NativeImage,
+} from 'electron';
 
 export type Channels = 'ipc-example';
 
@@ -35,6 +40,7 @@ const electronHandler = {
   Pin: {
     PinHandler: (pin: boolean) => ipcRenderer.invoke('pin-event', pin),
   },
+  close: () => ipcRenderer.invoke('close-app'),
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);

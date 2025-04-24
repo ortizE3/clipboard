@@ -179,8 +179,10 @@ const createWindow = async () => {
     }, 100);
   });
 
-  mainWindow.on('closed', () => {
-    mainWindow = null;
+  ipcMain.handle('close-app', () => {
+    if (mainWindow) {
+      mainWindow.close();
+    }
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);
