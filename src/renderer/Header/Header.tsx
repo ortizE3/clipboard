@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 
 import './Header.css';
 import Reset from '../../../assets/AppIcons/reset.png';
@@ -8,19 +8,36 @@ import close from '../../../assets/AppIcons/close.png';
 import HeaderProps from '../Models/HeaderProps';
 
 function Header(props: HeaderProps) {
-  const [isPin, setIsPin] = useState(false);
+  const [isPin, setIsPin] = useState(
+    JSON.parse(localStorage.getItem('isPin') ?? 'false'),
+  );
+  const [showHeader, setShowHeader] = useState(true);
 
   const pinHandler = () => {
     setIsPin(!isPin);
+    localStorage.setItem('isPin', JSON.stringify(!isPin));
   };
 
   useEffect(() => {
     window.electron.Pin.PinHandler(isPin);
   }, [isPin]);
 
+  useLayoutEffect(() => {
+    function updateSize() {
+      if (window.innerWidth < 200) {
+        setShowHeader(false);
+      } else {
+        setShowHeader(true);
+      }
+    }
+    window.addEventListener('resize', updateSize);
+    updateSize();
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
+
   return (
     <div className="header">
-      <h4 className="title">Clipboard</h4>
+      {showHeader && <h4 className="title">Clipboard</h4>}
       <div className="button-container">
         <button className="button-header" type="button" onClick={pinHandler}>
           <img className="button-img" src={!isPin ? Pin : Unpin} />

@@ -20,3 +20,15 @@ body {
     --secondary: #242729;
     --tertiary: #3a3b3b;
 }
+
+@media screen and (min-width: 800px) {
+    body {
+        font-size: 1.3em;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    body {
+        font-size: 1.6em;
+    }
+}

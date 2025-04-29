@@ -4,33 +4,10 @@
   display: flex;
   flex-direction: column;
   font-size: .9em;
-  margin-bottom: 2.2em;
-}
-
-.copied-element {
-  padding: 8px;
-  padding-left: 20px;
-  margin-top: 5px;
-  text-overflow: ellipsis;
-  background-color: var(--secondary);
-  border: none;
-  color: white;
-  text-align: left;
-  transition: all ease-in-out .2s;
-}
-
-.copied-element-img {
-  height: 60px;
-}
-
-.copied-element:hover {
-  background-color: var(--tertiary);;
-  cursor: pointer;
-  transform: scale(1.01);
 }
 
 .search-box {
-  padding: 10px;
+  padding: 10px 10px;
   text-overflow: ellipsis;
   background-color: var(--tertiary);
   border: none;
@@ -41,7 +18,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  font-size: 1.1em;
+  font-size: 1.05em;
   outline: none;
 
 }
@@ -49,4 +26,10 @@
   background-color: var(--tertiary);;
   cursor: pointer;
   transform: scale(1.01);
+}
+
+@media screen and (min-width: 800px) {
+  .search-box {
+      font-size: 1em;
+  }
 }

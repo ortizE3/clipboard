@@ -1,0 +1,56 @@
+.clip-container {
+    display: flex;
+    align-items: center;
+    align-content: center;
+}
+
+.copied-element {
+    padding: 8px;
+    padding-left: 20px;
+    margin-top: 5px;
+    background-color: var(--secondary);
+    border: none;
+    color: white;
+    text-align: left;
+    transition: all ease-in-out .2s;
+    width: 100%;
+}
+
+.copied-element-img {
+    height: 60px;
+}
+
+.copied-element:hover {
+    background-color: var(--tertiary);
+    cursor: pointer;
+    transform: scale(1.01);
+}
+
+.button-img-container {
+    margin: 0px 10px;
+    display: flex;
+    flex-direction: column;
+    align-self: end;
+}
+
+@media screen and (min-width: 800px) {
+    .copied-element-img {
+        height: 100px;
+    }
+
+    .copied-element {
+        margin-top: 8px;
+        padding-left: 25px;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .copied-element-img {
+        height: 160px;
+    }
+
+    .copied-element {
+        margin-top: 10px;
+        padding-left: 30px;
+    }
+}

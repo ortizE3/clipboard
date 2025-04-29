@@ -1,8 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import { NativeImage } from 'electron';
-
 import Clipboard from './Models/Clipboard';
 import Header from './Header/Header';
 import Clip from './Clip/Clip';
@@ -44,8 +43,23 @@ function Hello() {
     setPreviousClip(new Clipboard());
   }
 
+  const saveClipboardState = () => {
+    localStorage.setItem('clipboardList', JSON.stringify(clipboardList ?? []));
+  };
+
+  const loadClipboardState = () => {
+    const clipboards = localStorage.getItem('clipboardList');
+    if (clipboards) {
+      const parsedClipboards = JSON.parse(clipboards) as Clipboard[];
+      if (parsedClipboards && parsedClipboards.length > 0) {
+        setClipboardList(parsedClipboards);
+      }
+    }
+  };
+
   useEffect(() => {
     clearClipboard();
+    loadClipboardState();
   }, []);
 
   useEffect(() => {
@@ -54,11 +68,6 @@ function Hello() {
       if (clipboard && isDiffText(previousClip?.text, clipboard)) {
         const newClipboard = new Clipboard();
         newClipboard.text = clipboard;
-        if (clipboard && clipboard.length > 70) {
-          newClipboard.displayText = `${clipboard.substring(0, 70)}...`;
-        } else {
-          newClipboard.displayText = clipboard;
-        }
         setPreviousClip(newClipboard);
         setClipboardList([newClipboard, ...clipboardList]);
       }
@@ -83,9 +92,27 @@ function Hello() {
     return () => {
       if (intervalId) {
         clearInterval(intervalId);
+        saveClipboardState();
       }
     };
   }, [previousClip, clipboardList]);
+
+  const searchClips = () => {
+    for (let i = 0; i < clipboardList.length; i += 1) {
+      const clip = clipboardList[i];
+      const query = searchText.toLowerCase();
+      clip.show = searchText ? clip.text.toLowerCase().includes(query) : true;
+    }
+    if (clipboardList && clipboardList.length > 0) {
+      setClipboardList([...clipboardList]);
+    }
+  };
+
+  const removeClip = (index: number) => {
+    const newClipboardList = [...clipboardList];
+    newClipboardList.splice(index, 1);
+    setClipboardList(newClipboardList);
+  };
 
   useDebouncedEffect(
     () => {
@@ -95,26 +122,21 @@ function Hello() {
     300,
   );
 
-  const searchClips = () => {
-    for (const clip of clipboardList) {
-      const query = searchText.toLowerCase();
-      clip.show = searchText ? clip.text.toLowerCase().includes(query) : true;
-    }
-    setClipboardList([...clipboardList]);
-  };
-
   return (
     <div className="clipboard-background">
       <Header reset={reset} />
-      {clipboardList &&
-        clipboardList.map((clipboard, index) => (
-          <Clip
-            key={index}
-            clipboard={clipboard}
-            index={index}
-            updateClipboard={updateClipboard}
-          />
-        ))}
+      <div className="clipboard-container">
+        {clipboardList &&
+          clipboardList.map((clipboard, index) => (
+            <Clip
+              key={index}
+              clipboard={clipboard}
+              index={index}
+              removeClipboard={removeClip}
+              updateClipboard={updateClipboard}
+            />
+          ))}
+      </div>
       <input
         className="search-box"
         type="text"

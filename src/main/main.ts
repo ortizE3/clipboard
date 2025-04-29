@@ -16,7 +16,6 @@ import {
   ipcMain,
   clipboard,
   screen,
-  NativeImage,
   nativeImage,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
