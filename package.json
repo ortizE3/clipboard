@@ -178,6 +178,7 @@
     "productName": "ElectronReact",
     "appId": "org.erb.ElectronReact",
     "asar": true,
+    "icon": "assets/icon.png",
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
       "dist",
@@ -185,6 +186,7 @@
       "package.json"
     ],
     "mac": {
+      "icon": "assets/icon.icns",
       "sign": ".erb/scripts/notarize.js",
       "notarize": false,
       "target": {
@@ -217,13 +219,15 @@
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+      "icon": "assets/icon.ico"
     },
     "linux": {
       "target": [
         "AppImage"
       ],
-      "category": "Development"
+      "category": "Development",
+      "icon": "assets/icon.png"
     },
     "directories": {
       "app": "release/app",

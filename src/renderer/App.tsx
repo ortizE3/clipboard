@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import { NativeImage } from 'electron';
 import Clipboard from './Models/Clipboard';
@@ -15,7 +15,7 @@ function Hello() {
     new Clipboard(),
   );
   const [clipboardList, setClipboardList] = useState<Clipboard[]>([]);
-  const [intervalId, setIntervalId] = useState<any>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [searchText, setSearchText] = useState<string>('');
 
   function isDiffText(str1: string, str2: string) {
@@ -37,14 +37,16 @@ function Hello() {
   };
 
   function reset() {
-    clearInterval(intervalId);
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
     clearClipboard();
     setClipboardList([]);
     setPreviousClip(new Clipboard());
   }
 
   const saveClipboardState = () => {
-    localStorage.setItem('clipboardList', JSON.stringify(clipboardList ?? []));
+    localStorage.setItem('clipboardList', JSON.stringify(clipboardList));
   };
 
   const loadClipboardState = () => {
@@ -63,7 +65,7 @@ function Hello() {
   }, []);
 
   useEffect(() => {
-    const interval = setInterval(async () => {
+    intervalRef.current = setInterval(async () => {
       const clipboard = await window.electron.clipboard.readText();
       if (clipboard && isDiffText(previousClip?.text, clipboard)) {
         const newClipboard = new Clipboard();
@@ -87,11 +89,10 @@ function Hello() {
         setClipboardList([newClipboard, ...clipboardList]);
       }
     }, 300);
-    setIntervalId(interval);
 
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
         saveClipboardState();
       }
     };
